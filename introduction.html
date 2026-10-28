@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OrangalSu · 终极 Android Root 管理器</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%2338bdf8'/%3E%3Cstop offset='1' stop-color='%23818cf8'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect x='4' y='4' width='56' height='56' rx='16' fill='%230b1020'/%3E%3Ccircle cx='32' cy='32' r='18' fill='none' stroke='url(%23g)' stroke-width='7'/%3E%3Ccircle cx='32' cy='32' r='7' fill='url(%23g)'/%3E%3C/svg%3E">
+<style>
+  :root{
+    --bg:#0b1020; --surface:#121a34; --surface2:#0f1529;
+    --border:#25314f; --border-hi:#33446e;
+    --text:#e7ecf7; --muted:#93a0bd; --dim:#5d6b8c;
+    --accent:#38bdf8; --accent2:#818cf8; --ok:#34d399; --warn:#fbbf24; --danger:#f87171;
+    --radius:14px; --radius-sm:9px;
+    --maxw:1100px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:"PingFang SC","Noto Sans SC","Microsoft YaHei","Source Han Sans SC",system-ui,sans-serif;
+    background:var(--bg); color:var(--text); line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{background:rgba(56,189,248,.35)}
+  a{color:var(--accent);text-decoration:none}
+  a:hover{color:var(--accent2)}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 20px}
+
+  /* ===== 背景装饰层（纯装饰） ===== */
+  .bgdecor{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
+  .bgdecor .grid{position:absolute;inset:0;
+    background-image:linear-gradient(rgba(56,189,248,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(56,189,248,.05) 1px,transparent 1px);
+    background-size:52px 52px;
+    mask-image:radial-gradient(ellipse 80% 60% at 50% 0%,#000 30%,transparent 100%);
+    -webkit-mask-image:radial-gradient(ellipse 80% 60% at 50% 0%,#000 30%,transparent 100%);
+  }
+  .bgdecor .orb{position:absolute;border-radius:50%;filter:blur(90px);opacity:.5}
+  .orb1{width:520px;height:520px;top:-180px;left:50%;transform:translateX(-50%);background:radial-gradient(circle,rgba(56,189,248,.55),rgba(56,189,248,0) 70%)}
+  .orb2{width:420px;height:420px;top:420px;right:-160px;background:radial-gradient(circle,rgba(129,140,248,.4),rgba(129,140,248,0) 70%)}
+  .orb3{width:380px;height:380px;top:1100px;left:-140px;background:radial-gradient(circle,rgba(52,211,153,.22),rgba(52,211,153,0) 70%)}
+
+  /* ===== 导航 ===== */
+  nav{position:sticky;top:0;z-index:50;background:rgba(11,16,32,.72);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid var(--border)}
+  .nav-inner{max-width:var(--maxw);margin:0 auto;padding:14px 20px;display:flex;align-items:center;gap:22px}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:17px;letter-spacing:.2px}
+  .brand svg{width:30px;height:30px}
+  .nav-links{display:none;gap:4px;margin-left:8px}
+  .nav-links a{padding:7px 13px;border-radius:8px;color:var(--muted);font-size:14px}
+  .nav-links a:hover{color:var(--text);background:rgba(56,189,248,.08)}
+  .nav-cta{margin-left:auto}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border-radius:10px;padding:10px 20px;font-size:14.5px;font-weight:600;cursor:pointer;border:1px solid transparent;transition:transform .15s ease,box-shadow .15s ease,background .15s ease,color .15s ease}
+  .btn:active{transform:scale(.97)}
+  .btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#07101f;box-shadow:0 6px 22px rgba(56,189,248,.28)}
+  .btn-primary:hover{box-shadow:0 8px 28px rgba(56,189,248,.42);color:#07101f}
+  .btn-ghost{border-color:var(--border-hi);color:var(--text);background:rgba(18,26,52,.5)}
+  .btn-ghost:hover{border-color:var(--accent);color:var(--accent);background:rgba(56,189,248,.07)}
+  .btn-sm{padding:7px 14px;font-size:13.5px}
+
+  /* ===== Hero ===== */
+  header.hero{padding:84px 0 56px;text-align:center;position:relative}
+  .badge{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:999px;border:1px solid var(--border-hi);background:rgba(18,26,52,.55);font-size:13px;color:var(--muted);margin-bottom:22px}
+  .badge .dot{width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 10px rgba(52,211,153,.8)}
+  h1{font-size:clamp(32px,6vw,58px);line-height:1.12;font-weight:800;letter-spacing:-.5px;background:linear-gradient(180deg,#fff,#aebde0);-webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:18px}
+  .hero-sub{max-width:640px;margin:0 auto 32px;color:var(--muted);font-size:clamp(15px,2vw,17.5px)}
+  .hero-sub strong{color:var(--text);font-weight:600}
+  .hero-cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:44px}
+  .hero-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;max-width:680px;margin:0 auto}
+  .metric{border:1px solid var(--border);background:var(--surface2);border-radius:var(--radius);padding:18px 10px}
+  .metric .v{font-size:26px;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .metric .k{font-size:12.5px;color:var(--dim);margin-top:4px}
+
+  /* ===== 分区 ===== */
+  section{padding:64px 0}
+  .sec-head{text-align:center;max-width:620px;margin:0 auto 40px}
+  .sec-head .eyebrow{color:var(--accent);font-size:13.5px;font-weight:700;letter-spacing:2px;margin-bottom:10px}
+  .sec-head h2{font-size:clamp(24px,3.4vw,34px);font-weight:800;letter-spacing:-.3px;margin-bottom:12px}
+  .sec-head p{color:var(--muted);font-size:15px}
+
+  /* ===== 快速上手（Gmeek 标准） ===== */
+  .steps{display:grid;grid-template-columns:1fr;gap:14px;counter-reset:step}
+  .step{position:relative;border:1px solid var(--border);background:var(--surface);border-radius:var(--radius);padding:22px 22px 22px 62px;overflow:hidden}
+  .step::before{counter-increment:step;content:counter(step,decimal-leading-zero);position:absolute;left:18px;top:20px;font-size:22px;font-weight:800;color:var(--accent);opacity:.9;letter-spacing:.5px}
+  .step h3{font-size:16.5px;font-weight:700;display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:7px}
+  .step p{font-size:14px;color:var(--muted)}
+  .must{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;color:var(--danger);border:1px solid rgba(248,113,113,.4);background:rgba(248,113,113,.08);border-radius:6px;padding:2px 8px;letter-spacing:.5px}
+  .code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:2px 8px;color:var(--accent);white-space:nowrap}
+  .step .extra{margin-top:8px;font-size:12.5px;color:var(--dim)}
+
+  /* ===== 表格 ===== */
+  .tablewrap{border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;background:var(--surface)}
+  table{width:100%;border-collapse:collapse;table-layout:fixed}
+  col.c1{width:24%} col.c2{width:52%} col.c3{width:24%}
+  col.d1{width:38%} col.d2{width:38%} col.d3{width:24%}
+  th{background:var(--surface2);text-align:left;padding:13px 16px;font-size:13px;font-weight:700;color:var(--muted);letter-spacing:.5px;border-bottom:1px solid var(--border)}
+  td{padding:14px 16px;font-size:14px;border-bottom:1px solid var(--border);vertical-align:top;color:var(--text)}
+  tr:last-child td{border-bottom:none}
+  td .t{font-weight:700}
+  td .d{color:var(--muted);font-size:13px;margin-top:3px}
+  .tag{display:inline-block;font-size:11.5px;font-weight:700;border-radius:6px;padding:2px 8px;margin-top:2px}
+  .tag.ok{color:var(--ok);background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.35)}
+  .tag.part{color:var(--warn);background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.35)}
+  .tag.no{color:var(--dim);background:rgba(93,107,140,.12);border:1px solid rgba(93,107,140,.35)}
+
+  /* ===== 特性网格 ===== */
+  .features{display:grid;grid-template-columns:1fr;gap:14px}
+  .feat{border:1px solid var(--border);background:linear-gradient(180deg,rgba(20,30,58,.72),rgba(13,20,40,.86));border-radius:var(--radius);padding:24px;transition:border-color .18s ease,transform .18s ease}
+  .feat:hover{border-color:var(--border-hi);transform:translateY(-2px)}
+  .feat .ic{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,rgba(56,189,248,.16),rgba(129,140,248,.16));border:1px solid var(--border-hi);margin-bottom:14px}
+  .feat .ic svg{width:22px;height:22px;stroke:var(--accent)}
+  .feat h3{font-size:16px;font-weight:700;margin-bottom:6px}
+  .feat p{font-size:13.5px;color:var(--muted)}
+
+  /* ===== CTA ===== */
+  .cta-band{text-align:center;border:1px solid var(--border);border-radius:22px;background:linear-gradient(180deg,rgba(56,189,248,.07),rgba(129,140,248,.05));padding:52px 24px}
+  .cta-band h2{font-size:clamp(22px,3.2vw,30px);font-weight:800;margin-bottom:10px}
+  .cta-band p{color:var(--muted);font-size:14.5px;margin-bottom:26px}
+  .cta-band .hero-cta{margin-bottom:0}
+  footer{padding:34px 0 44px;border-top:1px solid var(--border);color:var(--dim);font-size:13px}
+  .foot-inner{display:flex;flex-direction:column;gap:10px;align-items:center;text-align:center}
+  @media(min-width:768px){
+    .nav-links{display:flex}
+    .steps{grid-template-columns:1fr 1fr}
+    .features{grid-template-columns:repeat(3,1fr)}
+    .foot-inner{flex-direction:row;justify-content:space-between;text-align:left}
+    section{padding:78px 0}
+  }
+  @media(min-width:1024px){
+    .steps{grid-template-columns:repeat(2,1fr)}
+  }
+  @media(prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto}
+    *{transition:none!important;animation:none!important}
+  }
+</style>
+</head>
+<body>
+<div class="bgdecor" aria-hidden="true">
+  <div class="grid"></div>
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+</div>
+
+<!-- ===== 导航 ===== -->
+<nav>
+  <div class="nav-inner">
+    <a class="brand" href="#top">
+      <svg viewBox="0 0 64 64" fill="none"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#38bdf8"/><stop offset="1" stop-color="#818cf8"/></linearGradient></defs><circle cx="32" cy="32" r="18" stroke="url(#lg)" stroke-width="7" fill="none"/><circle cx="32" cy="32" r="7" fill="url(#lg)"/></svg>
+      <span>OrangalSu</span>
+    </a>
+    <div class="nav-links">
+      <a href="#quickstart">快速上手</a>
+      <a href="#modes">工作模式</a>
+      <a href="#features">特性</a>
+      <a href="#devices">支持设备</a>
+    </div>
+    <div class="nav-cta"><button class="btn btn-primary btn-sm" data-toast="APK 请向项目作者获取当前构建（v2.2.0）">下载 APK</button></div>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="wrap">
+    <span class="badge"><span class="dot"></span>v2.2.0 · Android 9+ · 包名 com.orangal.su</span>
+    <h1>面向展讯设备的终极 Android Root 管理器</h1>
+    <p class="hero-sub">越狱、提权与 Magisk 集成三路合一。<strong>无需 root 前置</strong>的越狱模式、免刷机提权管理，与开机即装的 OrangalSu 壳——一套工具覆盖从修补、AVB 签名到刷入的完整链路。</p>
+    <div class="hero-cta">
+      <button class="btn btn-primary" data-toast="开始使用：下载 APK → 修补 boot → AVB 签名 → 刷入，见下方快速上手">开始使用</button>
+      <a class="btn btn-ghost" href="#quickstart">查看快速上手</a>
+    </div>
+    <div class="hero-metrics">
+      <div class="metric"><div class="v">3</div><div class="k">种工作模式</div></div>
+      <div class="metric"><div class="v">9–13</div><div class="k">Android 版本覆盖</div></div>
+      <div class="metric"><div class="v">35MB</div><div class="k">整分区产物约束</div></div>
+    </div>
+  </div>
+</header>
+
+<!-- ===== 快速上手（遵循 Gmeek 快速上手标准：分步 + 必须项标注） ===== -->
+<section id="quickstart">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">QUICK START</div>
+      <h2>快速上手</h2>
+      <p>四个步骤即可完成：安装 → 修补 → 签名 → 刷入。每一步的「必须」项缺一不可。</p>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <h3>安装 OrangalSu <span class="must">必须</span></h3>
+        <p>在 T20 上安装 <span class="code">OrangalSu-2.2.0.apk</span>（minSdk 28，即 Android 9）。首次打开授予必要权限，确认守护进程状态为在线。</p>
+        <div class="extra">验证：App 首页显示「守护进程在线」</div>
+      </div>
+      <div class="step">
+        <h3>修补 boot 镜像 <span class="must">必须</span></h3>
+        <p>在 App 的修补页选择工作模式（越狱 / Magisk 集成 / 免刷机提权），输入原厂 <span class="code">boot.img</span>。magisk 模式下自动装入 <span class="code">stub.xz</span>（OrangalSu 壳）与 tinyinit。</p>
+        <div class="extra">注意：产物必须保持整 35MB（36,700,160B）</div>
+      </div>
+      <div class="step">
+        <h3>AVB 签名 <span class="must">必须</span></h3>
+        <p>在修补模式中选择「添加 AVB 签名」。签名使用 SHA256_RSA4096，写入标准 HAS0 描述符（digest 位置、image_size 与镜像内容自洽）。</p>
+        <div class="extra">验证：vbmeta footer 存在，digest 与镜像匹配</div>
+      </div>
+      <div class="step">
+        <h3>刷入 boot 分区 <span class="must">必须</span></h3>
+        <p>将签名后的镜像刷入 boot 分区，重启。</p>
+        <div class="code">fastboot flash boot boot_signed.img</div>
+        <div class="extra">展讯 T20 亦可使用展讯下载工具烧录</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 工作模式（Gmeek 配置参数表标准） ===== -->
+<section id="modes">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">WORK MODES</div>
+      <h2>三种工作模式</h2>
+      <p>越狱优先、Magisk 兼容、免刷机兜底——按你的需求选一种，互斥可选。</p>
+    </div>
+    <div class="tablewrap">
+      <table>
+        <colgroup><col class="c1"><col class="c2"><col class="c3"></colgroup>
+        <thead>
+          <tr><th>模式</th><th>原理</th><th>权限要求</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="t">越狱模式</span></td>
+            <td><span class="d">cmdline 注入 <code class="code">androidboot.selinux=permissive</code>，ramdisk 由 tinyinit 挂载 system 分区并 pivot_root 后移交系统 init；不运行任何 root 守护进程。</span></td>
+            <td><span class="tag ok">无需 root</span></td>
+          </tr>
+          <tr>
+            <td><span class="t">Magisk 集成</span></td>
+            <td><span class="d">magiskinit 引导 + <code class="code">stub.xz</code>（OrangalSu 壳）随 boot 刷入，开机自动安装 OrangalSu 作为管理器。</span></td>
+            <td><span class="tag ok">刷机一次</span></td>
+          </tr>
+          <tr>
+            <td><span class="t">免刷机提权</span></td>
+            <td><span class="d">利用 CVE-2024-31317（ZygoteProcess 不安全反序列化）以任意应用身份执行代码，覆盖 Android 9–13；App 内一键检测与部署。</span></td>
+            <td><span class="tag part">需 WRITE_SECURE_SETTINGS</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 特性 ===== -->
+<section id="features">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">FEATURES</div>
+      <h2>为什么选择 OrangalSu</h2>
+      <p>液态玻璃视觉、内核级能力与签名级正确性，围绕展讯 T20 打磨。</p>
+    </div>
+    <div class="features">
+      <div class="feat">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 1 0 9 9"/><path d="M12 7a5 5 0 1 0 5 5"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/></svg></div>
+        <h3>液态玻璃 UI</h3>
+        <p>壁纸层毛玻璃 + 底栏半透明 blur，仪表盘与组件尺寸按触控密度收敛，对标 iOS 26 液态玻璃质感。</p>
+      </div>
+      <div class="feat">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z"/></svg></div>
+        <h3>越狱模式</h3>
+        <p>内核 Permissive 启动，不依赖任何 root 前置条件，tiniinit 自动挂载 system 并 pivot_root，行为贴近原厂 SAR。</p>
+      </div>
+      <div class="feat">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <h3>免刷机提权</h3>
+        <p>CVE-2024-31317 提权通道：Android 9–13 全系覆盖，不刷 boot 也能进入提权管理流程。</p>
+      </div>
+      <div class="feat">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/><circle cx="12" cy="16" r="1.6"/></svg></div>
+        <h3>AVB 签名正确性</h3>
+        <p>SHA256_RSA4096 + 标准 AvbHashDescriptor：digest 位于标准偏移、image_size 自洽、RSA 验签可通过，产物过启动校验。</p>
+      </div>
+      <div class="feat">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17l6-6 4 4 6-7"/><path d="M4 21h16"/></svg></div>
+        <h3>Magisk 集成</h3>
+        <p>stub.xz = OrangalSu 壳，随 boot 刷入后开机自动安装，root 权限由 OrangalSu 管理而非 Magisk。</p>
+      </div>
+      <div class="feat">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+        <h3>展讯链路打磨</h3>
+        <p>为 ud710_ctg30air / T20 定制：boot 整 35MB、page 2048、header v1、无 ramdisk 原厂镜像全适配。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 支持设备 ===== -->
+<section id="devices">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">DEVICES</div>
+      <h2>支持设备与分区要求</h2>
+      <p>当前以科大讯飞 T20 为基准验证，镜像参数如下。</p>
+    </div>
+    <div class="tablewrap">
+      <table>
+        <colgroup><col class="d1"><col class="d2"><col class="d3"></colgroup>
+        <thead>
+          <tr><th>项目</th><th>值</th><th>状态</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><span class="t">设备</span></td><td><span class="d">科大讯飞学习机 T20（展讯 ud710_ctg30air）</span></td><td><span class="tag ok">已验证</span></td></tr>
+          <tr><td><span class="t">Android 版本</span></td><td><span class="d">Android 9（minSdk 28，targetSdk 34）</span></td><td><span class="tag ok">支持</span></td></tr>
+          <tr><td><span class="t">boot 分区</span></td><td><span class="d">36,700,160B（35MB 整）</span></td><td><span class="tag ok">支持</span></td></tr>
+          <tr><td><span class="t">boot 格式</span></td><td><span class="d">header v1（ANDROID!）/ page 2048 / 内核 18,376,712B / 原厂无 ramdisk</span></td><td><span class="tag ok">支持</span></td></tr>
+          <tr><td><span class="t">提权通道</span></td><td><span class="d">CVE-2024-31317（Android 9–13）</span></td><td><span class="tag part">免刷机</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CTA ===== -->
+<section>
+  <div class="wrap">
+    <div class="cta-band">
+      <h2>准备好了吗？</h2>
+      <p>拿到 APK，按快速上手四步走，在 T20 上跑起 OrangalSu。</p>
+      <div class="hero-cta">
+        <button class="btn btn-primary" data-toast="APK 请向项目作者获取当前构建（v2.2.0）">下载 APK</button>
+        <a class="btn btn-ghost" href="#quickstart">重新查看快速上手</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot-inner">
+    <span>OrangalSu v2.2.0 · 面向展讯 T20 的 Root 管理器</span>
+    <span>boot 产物保持 35MB 整 · AVB SHA256_RSA4096</span>
+  </div>
+</footer>
+
+<script>
+(function(){
+  // Toast 反馈（占位 CTA）
+  var btnText=null;
+  function toast(msg){
+    var old=document.querySelector('.toast');
+    if(old) old.remove();
+    var t=document.createElement('div');
+    t.className='toast';
+    t.textContent=msg;
+    Object.assign(t.style,{position:'fixed',left:'50%',bottom:'34px',transform:'translateX(-50%)',background:'rgba(15,21,42,.96)',color:'#e7ecf7',border:'1px solid #33446e',borderRadius:'10px',padding:'11px 18px',fontSize:'13.5px',zIndex:'99',boxShadow:'0 10px 30px rgba(0,0,0,.45)',maxWidth:'86vw',textAlign:'center'});
+    document.body.appendChild(t);
+    setTimeout(function(){t.style.transition='opacity .3s';t.style.opacity='0';setTimeout(function(){t.remove()},320)},2600);
+  }
+  document.querySelectorAll('[data-toast]').forEach(function(b){
+    b.addEventListener('click',function(){toast(b.getAttribute('data-toast'))});
+  });
+  // 导航高亮
+  var links=document.querySelectorAll('.nav-links a');
+  var secs=['quickstart','modes','features','devices'].map(function(id){return document.getElementById(id)});
+  function onScroll(){
+    var y=window.scrollY+120,cur='';
+    secs.forEach(function(s,i){if(s&&s.offsetTop<=y)cur=links[i].getAttribute('href')});
+    links.forEach(function(a){a.style.color=a.getAttribute('href')===cur?'#38bdf8':'',a.style.background=a.getAttribute('href')===cur?'rgba(56,189,248,.08)':''});
+  }
+  window.addEventListener('scroll',onScroll,{passive:true});
+  onScroll();
+})();
+</script>
+</body>
+</html>
