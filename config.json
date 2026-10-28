@@ -1,6 +1,125 @@
 {
-    "title":"Blog Title",
-    "subTitle":"Blog description",
-    "avatarUrl":"https://github.githubassets.com/favicons/favicon.svg",
-    "GMEEK_VERSION":"last"
+    "title": "OrangalSu",
+    "subTitle": "面向展讯 T20 的终极 Android Root 管理器：越狱模式、免刷机提权与 Magisk 集成三路合一",
+    "avatarUrl": "https://aka.doubaocdn.com/s/PgRJfjHIsA",
+    "GMEEK_VERSION": "last",
+
+    "displayTitle": "OrangalSu",
+    "faviconUrl": "https://aka.doubaocdn.com/s/PgRJfjHIsA",
+    "startSite": "10/28/2026",
+    "onePageListNum": 100,
+
+    "commentLabelColor": "#38bdf8",
+    "yearColorList": ["#38bdf8", "#818cf8", "#34d399", "#fbbf24"],
+
+    "i18n": "CN",
+    "UTC": 8,
+
+    "themeMode": "fix",
+    "dayTheme": "light",
+    "nightTheme": "dark-blue",
+
+    "urlMode": "issue",
+
+    "bottomText": "OrangalSu v2.2.0 · boot 产物保持 35MB 整 · AVB SHA256_RSA4096",
+    "showPostSource": 0,
+    "needComment": 1,
+
+    "hero": {
+        "badge": "v2.2.0 · Android 9+ · 包名 com.orangal.su",
+        "title": "面向展讯设备的终极 Android Root 管理器",
+        "subtitle": "越狱、提权与 Magisk 集成三路合一。无需 root 前置的越狱模式、免刷机提权管理，与开机即装的 OrangalSu 壳——一套工具覆盖从修补、AVB 签名到刷入的完整链路。",
+        "metrics": [
+            { "value": "3", "key": "种工作模式" },
+            { "value": "9–13", "key": "Android 版本覆盖" },
+            { "value": "35MB", "key": "整分区产物约束" }
+        ]
+    },
+
+    "quickStart": {
+        "intro": "四个步骤即可完成：安装 → 修补 → 签名 → 刷入。每一步的「必须」项缺一不可。",
+        "steps": [
+            {
+                "title": "安装 OrangalSu",
+                "must": true,
+                "desc": "在 T20 上安装 OrangalSu-2.2.0.apk（minSdk 28，即 Android 9），首次打开授予必要权限，确认守护进程状态为在线。",
+                "verify": "App 首页显示「守护进程在线」"
+            },
+            {
+                "title": "修补 boot 镜像",
+                "must": true,
+                "desc": "在 App 的修补页选择工作模式（越狱 / Magisk 集成 / 免刷机提权），输入原厂 boot.img。magisk 模式下自动装入 stub.xz（OrangalSu 壳）与 tinyinit。",
+                "verify": "产物必须保持整 35MB（36,700,160B）"
+            },
+            {
+                "title": "AVB 签名",
+                "must": true,
+                "desc": "在修补模式中选择「添加 AVB 签名」。签名使用 SHA256_RSA4096，写入标准 HAS0 描述符（digest 位置、image_size 与镜像内容自洽）。",
+                "verify": "vbmeta footer 存在，digest 与镜像匹配"
+            },
+            {
+                "title": "刷入 boot 分区",
+                "must": true,
+                "desc": "将签名后的镜像刷入 boot 分区，重启。fastboot flash boot boot_signed.img。展讯 T20 亦可使用展讯下载工具烧录。",
+                "verify": ""
+            }
+        ]
+    },
+
+    "workModes": {
+        "intro": "越狱优先、Magisk 兼容、免刷机兜底——按你的需求选一种，互斥可选。",
+        "modes": [
+            {
+                "name": "越狱模式",
+                "principle": "cmdline 注入 androidboot.selinux=permissive，ramdisk 由 tinyinit 挂载 system 分区并 pivot_root 后移交系统 init；不运行任何 root 守护进程。",
+                "requirement": "无需 root",
+                "tag": "ok"
+            },
+            {
+                "name": "Magisk 集成",
+                "principle": "magiskinit 引导 + stub.xz（OrangalSu 壳）随 boot 刷入，开机自动安装 OrangalSu 作为管理器。",
+                "requirement": "刷机一次",
+                "tag": "ok"
+            },
+            {
+                "name": "免刷机提权",
+                "principle": "利用 CVE-2024-31317（ZygoteProcess 不安全反序列化）以任意应用身份执行代码，覆盖 Android 9–13；App 内一键检测与部署。",
+                "requirement": "需 WRITE_SECURE_SETTINGS",
+                "tag": "part"
+            }
+        ]
+    },
+
+    "features": {
+        "intro": "液态玻璃视觉、内核级能力与签名级正确性，围绕展讯 T20 打磨。",
+        "items": [
+            { "title": "液态玻璃 UI", "desc": "壁纸层毛玻璃 + 底栏半透明 blur，仪表盘与组件尺寸按触控密度收敛，对标 iOS 26 液态玻璃质感。" },
+            { "title": "越狱模式", "desc": "内核 Permissive 启动，不依赖任何 root 前置条件，tinyinit 自动挂载 system 并 pivot_root，行为贴近原厂 SAR。" },
+            { "title": "免刷机提权", "desc": "CVE-2024-31317 提权通道：Android 9–13 全系覆盖，不刷 boot 也能进入提权管理流程。" },
+            { "title": "AVB 签名正确性", "desc": "SHA256_RSA4096 + 标准 AvbHashDescriptor：digest 位于标准偏移、image_size 自洽、RSA 验签可通过，产物过启动校验。" },
+            { "title": "Magisk 集成", "desc": "stub.xz = OrangalSu 壳，随 boot 刷入后开机自动安装，root 权限由 OrangalSu 管理而非 Magisk。" },
+            { "title": "展讯链路打磨", "desc": "为 ud710_ctg30air / T20 定制：boot 整 35MB、page 2048、header v1、无 ramdisk 原厂镜像全适配。" }
+        ]
+    },
+
+    "devices": {
+        "intro": "当前以科大讯飞 T20 为基准验证，镜像参数如下。",
+        "rows": [
+            { "item": "设备", "value": "科大讯飞学习机 T20（展讯 ud710_ctg30air）", "status": "已验证" },
+            { "item": "Android 版本", "value": "Android 9（minSdk 28，targetSdk 34）", "status": "支持" },
+            { "item": "boot 分区", "value": "36,700,160B（35MB 整）", "status": "支持" },
+            { "item": "boot 格式", "value": "header v1（ANDROID!）/ page 2048 / 内核 18,376,712B / 原厂无 ramdisk", "status": "支持" },
+            { "item": "提权通道", "value": "CVE-2024-31317（Android 9–13）", "status": "免刷机" }
+        ]
+    },
+
+    "cta": {
+        "title": "准备好了吗？",
+        "desc": "拿到 APK，按快速上手四步走，在 T20 上跑起 OrangalSu。"
+    },
+
+    "footer": {
+        "left": "OrangalSu v2.2.0 · 面向展讯 T20 的 Root 管理器",
+        "right": "boot 产物保持 35MB 整 · AVB SHA256_RSA4096"
+    }
 }
